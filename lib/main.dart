@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'blocs/blocDelegate.dart';
+import 'models/contacts.dart';
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
@@ -58,11 +59,32 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    res.loadFromLocal().then((_){
+      if (_) {
+        print("Tải lên danh bạ thành công! length:${res.contacts.contact.length}");
+      }else{
+        print("Tải lên danh bạ thất bại!");
+      }
+    }).catchError((_){
+      print("Tải lên danh bạ thất bại!");
+    });
     isShowFloatingButton = true;
     _scrollController.addListener(scrollListener);
     super.initState();
   }
-
+  @override
+  void dispose() {
+    res.saveToLocal().then((_){
+      if (_) {
+        print("Lưu danh bạ thành công!");
+      }else{
+        print("Lưu danh bạ thất bại!");
+      }
+    }).catchError((_){
+      print("Lưu danh bạ thất bại!");
+    });
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -72,9 +94,27 @@ class _MyHomePageState extends State<MyHomePage> {
           if (state is InitialContactState) {
             print('Trang thai khoi tao');
           } else if (state is AddContactState) {
-            res.add(Contact(state.name, state.phone));
+            res.add(Contact(name: state.name, phone: state.phone));
+            res.saveToLocal().then((_){
+              if (_) {
+                print("Lưu danh bạ thành công!");
+              }else{
+                print("Lưu danh bạ thất bại!");
+              }
+            }).catchError((_){
+              print("Lưu danh bạ thất bại!");
+            });
           } else if (state is RemoveContactState) {
             res.remove(state.phone);
+            res.saveToLocal().then((_){
+              if (_) {
+                print("Lưu danh bạ thành công!");
+              }else{
+                print("Lưu danh bạ thất bại!");
+              }
+            }).catchError((_){
+              print("Lưu danh bạ thất bại!");
+            });
           }
         },
         child: BlocBuilder<ContactBloc, ContactState>(
@@ -96,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     constraints: BoxConstraints.expand(),
                     child: Padding(
                       padding: EdgeInsets.all(8),
-                      child: res.getAll().length == 0
+                      child: (res.getAll()?.length??0) == 0
                           ? Center(
                               child: Text('Không có danh bạ'),
                             )

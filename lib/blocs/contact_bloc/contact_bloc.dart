@@ -7,6 +7,17 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
   @override
   ContactState get initialState => InitialContactState();
 
+
+  @override
+  void onError(Object error, StackTrace stacktrace) {
+    print('$error, $stacktrace');
+  }
+
+  @override
+  void onTransition(Transition<ContactEvent, ContactState> transition) {
+    print(transition);
+  }
+
   @override
   Stream<ContactState> mapEventToState(
     ContactEvent event,

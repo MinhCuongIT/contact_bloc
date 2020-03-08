@@ -1,31 +1,44 @@
-class Contact {
-  String name;
-  String phone;
+import 'package:shared_preferences/shared_preferences.dart';
 
-  Contact(this.name, this.phone);
-
-  @override
-  String toString() {
-    return "name: $name, phone: $phone";
-  }
-}
+import 'contacts.dart';
 
 class Respo {
-  List<Contact> lsContact = <Contact>[];
+  Contacts contacts = Contacts();
 
   List<Contact> getAll() {
-    return lsContact;
+    return contacts.contact;
   }
 
   void add(Contact c) {
-    lsContact.insert(0, c);
+    contacts.contact.insert(0, c);
   }
 
   void remove(String phone) {
-    lsContact.removeWhere((c) => c.phone == phone);
+    contacts.contact.removeWhere((c) => c.phone == phone);
   }
 
   void update(String phone, String name) {
-    lsContact.firstWhere((c) => c.phone == phone).name = name;
+    contacts.contact.firstWhere((c) => c.phone == phone).name = name;
+  }
+
+  Future<bool> saveToLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setString("contacts", contacts.toRawJson());
+  }
+
+  Future<bool> loadFromLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      String rawJson = prefs.getString("contacts");
+      if (rawJson!= null) {
+        contacts = Contacts.fromRawJson(rawJson);
+      }else{
+        contacts.contact = <Contact>[];
+      }
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 }
